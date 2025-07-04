@@ -268,14 +268,6 @@ void promediosHistoricos() {
     printf("PM25: %.2f ug/m3\n", suma_pm25 / contador);
 }
 
-void ingresarClima() {
-    printf("\n--- Ingreso de datos de clima ---\n");
-    Clima.temperatura = leerNumeroFlotanteEntre("Ingrese la temperatura: ", -100, 100);
-    Clima.viento = leerNumeroFlotanteEntre("Ingrese la velocidad del viento (km/h): ", 0, 500);
-    Clima.humedad = leerNumeroFlotanteEntre("Ingrese la humedad relativa(%): ", 0, 100);
-    printf("Datos de clima guardados: Temperatura=%.2f C, Viento=%.2f km/h, Humedad=%.2f%%\n", Clima.temperatura, Clima.viento, Clima.humedad);
-}
-
 void prediccion(){
     // Prediccion de niveles futuros usando promedio de los ultimos 7 dias
     printf("\n--- Prediccion de niveles futuros (promedio 7 dias) ---\n");
@@ -447,46 +439,50 @@ void guardarPalabra(char *mensaje, char destino[], int longitud) {
 }
 
 void ordenar(){
-    FILE *datos = fopen(DATA,"r");
-    FILE *orden = fopen("temp.txt","w");
-    if (datos == NULL || orden == NULL) {
+    // Estructura para almacenar los registros
+    struct Registro {
+        int id;
+        char nombre[50];
+        char fecha[20];
+        float co2, so2, no2, pm25;
+    }registros[1000], temp;
+    int n = 0;
+    FILE *datos = fopen(DATA, "r");
+    if (datos == NULL) {
         printf("No se pudo abrir el archivo de datos.\n");
+        return;
     }
-    char fechas[7][20];
-    int count = 0;
-    int id;
-    char nombre[50], fecha[20];
-    float co2, so2, no2, pm25;
-    int encontrado = 0;
-    int ids[100];
-    char nombres[100][50];
-    int num_ids = 0;
-    while (fscanf(datos, "%d,%49[^,],%19[^,],%f,%f,%f,%f", &id, nombre, fecha, &co2, &so2, &no2, &pm25) == 7) {
-        encontrado = 0;
-        for (int i = 0; i < num_ids; i++) {
-            if (ids[i] == id && strcmp(nombres[i], nombre) == 0) {
-                encontrado = 1;
-                break;
+    // Leer todos los registros
+    while (fscanf(datos, "%d,%49[^,],%19[^,],%f,%f,%f,%f", &registros[n].id, registros[n].nombre, registros[n].fecha, &registros[n].co2, &registros[n].so2, &registros[n].no2, &registros[n].pm25) == 7 && n < 1000) {
+        n++;
+    }
+    fclose(datos);
+    // Ordenar por id y fecha
+    for (int i = 0; i < n-1; i++) {
+        for (int j = 0; j < n-i-1; j++) {
+            if (registros[j].id > registros[j+1].id ||(registros[j].id == registros[j+1].id && strcmp(registros[j].fecha, registros[j+1].fecha) > 0)) {
+                temp = registros[j];
+                registros[j] = registros[j+1];
+                registros[j+1] = temp;
             }
         }
-        if (!encontrado) {
-            ids[num_ids] = id;
-            strncpy(nombres[num_ids], nombre, 50);
-            nombres[num_ids][49] = '\0';
-            num_ids++;
-        }
     }
-    while (fscanf(datos, "%d,%49[^,],%19[^,],%f,%f,%f,%f", &id, nombre, fecha, &co2, &so2, &no2, &pm25) == 7) {
-       for (int i = 0; i < encontrado; i++)
-       {
-        
-       }
-       
+    // Escribir en archivo temporal
+    FILE *orden = fopen("temp.txt", "w");
+    if (orden == NULL) {
+        printf("No se pudo abrir el archivo temporal.\n");
+        return;
     }
-    printf("%d",encontrado);
-
-
-
+    for (int i = 0; i < n; i++) {
+        fprintf(orden, "%d,%s,%s,%.2f,%.2f,%.2f,%.2f\n",
+                registros[i].id, registros[i].nombre, registros[i].fecha,registros[i].co2, 
+                registros[i].so2, registros[i].no2, registros[i].pm25);
+    }
+    fclose(orden);
+    //Sobrescribir el archivo original
+    remove(DATA);
+    rename("temp.txt", DATA);
+    printf("Registros ordenados: %d\n", n);
 }
 
 
