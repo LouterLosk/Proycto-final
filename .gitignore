@@ -1,0 +1,6 @@
+*.exe
+pruebas.c
+*.o
+*.json
+datosClima copy.txt
+exportacion.txt
