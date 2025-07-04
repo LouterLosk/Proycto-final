@@ -60,7 +60,8 @@ int main() {
         printf("3. Calculo de promedios historicos\n");
         printf("4. Generacion de recomendaciones\n");
         printf("5. Exportacion de datos\n");
-        printf("6. Salir\n");
+        printf("6. Mostrar zonas registradas\n");
+        printf("7. Salir\n");
         printf("-------------------------------------\n");
         printf("Seleccione una opcion: ");
         scanf("%d", &eleccion);
@@ -84,6 +85,9 @@ int main() {
                 exportacionDatos();
                 break;
             case 6:
+                imprimirZonas();
+                break;
+            case 7:
                 continuar = 0;
                 printf("Saliendo.....\n");
                 break;
