@@ -18,13 +18,6 @@ struct Contaminacion{
     float pm25;
 }contaminacion;
 
-struct Clima{
-    float temperatura;
-    float viento;
-    float humedad;
-}Clima;
-
-
 // Estructura para Zona con ID y nombre
 struct Zona {
     int id;
@@ -40,7 +33,6 @@ float calcularAQI_PM25(float pm);
 float calcularAQI_NO2(float no2_ppb);
 float calcularAQI_SO2(float so2_ppb);
 float calcularAQI_CO2(float co2);
-void ingresarClima();
 void imprimirClasificacionAQI(const char* nombre, float AQI);
 void prediccion();
 void promediosHistoricos();
@@ -49,6 +41,7 @@ void exportacionDatos();
 void generacionRecomendaciones(float co2, float so2, float no2, float pm25);
 void recomendacionesPorZona();
 void ordenar();
+
 
 int main() {
     int continuar = 1;
