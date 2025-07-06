@@ -33,7 +33,7 @@ float calcularAQI_PM25(float pm);
 float calcularAQI_NO2(float no2_ppb);
 float calcularAQI_SO2(float so2_ppb);
 float calcularAQI_CO2(float co2);
-void imprimirClasificacionAQI(const char* nombre, float AQI);
+void imprimirClasificacionAQI(char nombre[], float AQI);
 void prediccion();
 void promediosHistoricos();
 int imprimirZonas();
@@ -41,7 +41,6 @@ void exportacionDatos();
 void generacionRecomendaciones(float co2, float so2, float no2, float pm25);
 void recomendacionesPorZona();
 void ordenar();
-
 
 int main() {
     int continuar = 1;
@@ -346,7 +345,8 @@ void ingresarZona() {
         char nombre_tmp[50], fecha_tmp[20];
         while (fscanf(busca, "%d,%49[^,],%19[^,]", &id_tmp, nombre_tmp, fecha_tmp) == 3) {
             // Saltar el resto de la línea
-            int c; while ((c = fgetc(busca)) != '\n' && c != EOF);
+            int c; 
+            while ((c = fgetc(busca)) != '\n' && c != EOF);
             if (id_tmp == zona.id) {
                 strncpy(zona.nombre, nombre_tmp, 50);
                 zona.nombre[49] = '\0';
@@ -361,11 +361,11 @@ void ingresarZona() {
     } else {
         printf("Nombre de zona detectado automaticamente: %s\n", zona.nombre);
     }
-    // Obtener la fecha de hoy
-    char fecha[11];
+    // Obtener la fecha y hora actual
+    char fecha_hora[20];
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
-    snprintf(fecha, sizeof(fecha), "%04d-%02d-%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+    snprintf(fecha_hora, sizeof(fecha_hora), "%04d-%02d-%02d %02d:%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min);
     rewind(datos);
     //Ingreso de datos
     printf("partes por millon\n");
@@ -374,8 +374,8 @@ void ingresarZona() {
     contaminacion.so2 = leerNumeroFlotanteEntre("Ingrese la cantida de SO2: ",0,2147483647);
     contaminacion.no2 = leerNumeroFlotanteEntre("Ingrese la cantida de NO2: ",0,2147483647);
     contaminacion.pm25 = leerNumeroFlotanteEntre("Ingrese la cantida de pm25: ",0,2147483647);
-    fprintf(datos, "%d,%s,%s,%.2f,%.2f,%.2f,%.2f\n", zona.id, zona.nombre, fecha, contaminacion.co2, contaminacion.so2, contaminacion.no2, contaminacion.pm25);
-    printf("Zona ingresada correctamente. Fecha: %s\n", fecha);
+    fprintf(datos, "%d,%s,%s,%.2f,%.2f,%.2f,%.2f\n", zona.id, zona.nombre, fecha_hora, contaminacion.co2, contaminacion.so2, contaminacion.no2, contaminacion.pm25);
+    printf("Zona ingresada correctamente. Fecha y hora: %s\n", fecha_hora);
     fclose(datos);
     preventivas(contaminacion.co2,contaminacion.so2,contaminacion.no2,contaminacion.pm25);
     printf("\n--- Alertas Preventivas de AQI ---\n");
@@ -526,7 +526,7 @@ void preventivas(float CO2, float SO2, float NO2, float PM25) {
      printf(" Con: %.2f\n",PM25);
 }
 // Funcion para clasificar el AQI de cada contaminante
-void imprimirClasificacionAQI(const char* nombre, float AQI) {
+void imprimirClasificacionAQI(char nombre[], float AQI) {
     printf("%s: ", nombre);
     if (AQI <= 50)
         printf("Bueno (0-50)");
